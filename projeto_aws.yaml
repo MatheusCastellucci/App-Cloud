@@ -183,7 +183,7 @@ Resources:
           sudo apt install -y git
 
           echo "Cloning the repository"
-          git clone https://github.com/Joao-pedrosantos/cloud /home/ec2-user/yourapp
+          git clone https://github.com/MatheusCastellucci/App-Cloud /home/ec2-user/yourapp
 
           echo "Changing directory"
           cd /home/ec2-user/yourapp
@@ -212,16 +212,60 @@ Resources:
           Value: MyAutoScalingGroup
           PropagateAtLaunch: true
 
-  # Scaling Policy based on CPU Utilization
-  ScalingPolicy:
+
+    # Scaling Policies based on NetworkIn
+  ScaleUpPolicy:
     Type: 'AWS::AutoScaling::ScalingPolicy'
     Properties:
       AutoScalingGroupName: !Ref AutoScalingGroup
-      PolicyType: TargetTrackingScaling
-      TargetTrackingConfiguration:
-        PredefinedMetricSpecification:
-          PredefinedMetricType: ASGAverageCPUUtilization
-        TargetValue: 70.0
+      PolicyType: SimpleScaling
+      ScalingAdjustment: 1
+      AdjustmentType: ChangeInCapacity
+      Cooldown: 300
+
+  ScaleDownPolicy:
+    Type: 'AWS::AutoScaling::ScalingPolicy'
+    Properties:
+      AutoScalingGroupName: !Ref AutoScalingGroup
+      PolicyType: SimpleScaling
+      ScalingAdjustment: -1
+      AdjustmentType: ChangeInCapacity
+      Cooldown: 300
+
+  NetworkInAlarmHigh:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmDescription: 'Alarm if NetworkIn exceeds 100 packets per second'
+      Namespace: 'AWS/EC2'
+      MetricName: 'NetworkIn'
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref AutoScalingGroup
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 100
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions:
+        - !Ref ScaleUpPolicy
+
+  NetworkInAlarmLow:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmDescription: 'Alarm if NetworkIn falls below 20 packets per second'
+      Namespace: 'AWS/EC2'
+      MetricName: 'NetworkIn'
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref AutoScalingGroup
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 20
+      ComparisonOperator: LessThanThreshold
+      AlarmActions:
+        - !Ref ScaleDownPolicy
+
 
   # ALB
   MyALB:

@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 # Configurações do DynamoDB
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
-table = dynamodb.Table('Users_luca')
+table = dynamodb.Table('MyDynamoDBTableName')
 
 # Modelo Pydantic para usuário
 class Usuario(BaseModel):
