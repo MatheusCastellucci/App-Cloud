@@ -79,8 +79,10 @@ Para executar o projeto, também é necessário criar um par de chaves SSH. Aces
 Com tudo configurado, acesse o serviço de CloudFormation da AWS e crie um novo stack. Selecione o arquivo .yaml presente na pasta raiz do projeto e siga as instruções para criar o stack.
 
 ```bash
-aws cloudformation create-stack --stack-name nome_da_stack --template-body file://stack.yaml --capabilities CAPABILITY_IAM
+aws cloudformation create-stack --stack-name nome_da_stack --template-body file://projeto_aws.yaml --capabilities CAPABILITY_IAM
+```
 
+```bash
 aws cloudformation delete-stack --stack-name nome_da_stack
 ```
 
