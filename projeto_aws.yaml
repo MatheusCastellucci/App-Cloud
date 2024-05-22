@@ -348,9 +348,7 @@ Resources:
       Path: '/'
       Roles: 
         - Ref: 'EC2DynamoDBRole'
-
-
-
+        
 Outputs:
   VPCId:
     Description: "VPC ID"
@@ -369,4 +367,4 @@ Outputs:
     Value: !GetAtt MyALB.DNSName
   DynamoDBTableName:
     Description: "Name of the DynamoDB Table"
-    Value: !Ref MyDynamoDBTable
+    Value: !Ref MatheusTable
