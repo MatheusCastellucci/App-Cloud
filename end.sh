@@ -3,14 +3,14 @@
 echo "Destruindo a stack..."
 
 # Deletar a stack
-aws cloudformation delete-stack --stack-name Yobama
+aws cloudformation delete-stack --stack-name yobama
 
 # Verificar se o comando delete-stack foi bem-sucedido
 if [ $? -eq 0 ]; then
     echo "Esperando a stack ser destruída..."
 
     # Esperar até que a stack seja completamente deletada
-    aws cloudformation wait stack-delete-complete --stack-name Yobama
+    aws cloudformation wait stack-delete-complete --stack-name yobama
 
     # Verificar se a espera foi bem-sucedida
     if [ $? -eq 0 ]; then
