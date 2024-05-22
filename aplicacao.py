@@ -16,23 +16,23 @@ logger = logging.getLogger()
 
 @app.route('/health', methods=['GET'])
 def health():
-    health_status = {'DynamoDB': 'Healthy'}
+    healthy = {'DynamoDB': 'Healthy'}
     try:
         # Check if DynamoDB table is available
         table.table_status
     except NoCredentialsError:
         logger.error("Credentials not available")
-        health_status['DynamoDB'] = 'Degraded - No credentials'
+        healthy['DynamoDB'] = 'Degraded - No credentials'
     except PartialCredentialsError:
         logger.error("Incomplete credentials")
-        health_status['DynamoDB'] = 'Degraded - Incomplete credentials'
+        healthy['DynamoDB'] = 'Degraded - Incomplete credentials'
     except Exception as e:
         logger.error(f"An error occurred with DynamoDB: {e}")
-        health_status['DynamoDB'] = f'Unhealthy - {e}'
+        healthy['DynamoDB'] = f'Unhealthy - {e}'
     
-    overall_status = 'Healthy' if all(status == 'Healthy' for status in health_status.values()) else 'Unhealthy'
+    status = 'Healthy' if all(status == 'Healthy' for status in healthy.values()) else 'Unhealthy'
     
-    return jsonify({'message': overall_status, 'details': health_status}), 200 if overall_status == 'Healthy' else 500
+    return jsonify({'message': status, 'details': healthy}), 200 if status == 'Healthy' else 500
 
 
 @app.route('/add_user', methods=['POST'])
