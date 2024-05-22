@@ -22,13 +22,7 @@ Resources:
         - Key: Name
           Value: MyInternetGateway
 
-  InternetRoute:
-    Type: 'AWS::EC2::Route'
-    Properties:
-      RouteTableId: !Ref MyRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref MyInternetGateway
-
+  # Route Table for the VPC        
   MyRouteTable:
     Type: 'AWS::EC2::RouteTable'
     Properties:
@@ -37,25 +31,22 @@ Resources:
         - Key: Name
           Value: MyRouteTable
 
-  AttachRouteTableteste:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+  # Attach Internet Gateway to the VPC        
+  InternetRoute:
+    Type: 'AWS::EC2::Route'
     Properties:
-      SubnetId: !Ref PublicSubnetOne
       RouteTableId: !Ref MyRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref MyInternetGateway
 
-  AttachRouteTableteste2:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
-    Properties:
-      SubnetId: !Ref PublicSubnetTwo
-      RouteTableId: !Ref MyRouteTable
-  # Attach Internet Gateway to the VPC
-
-  
-  AttachGateway:
-    Type: 'AWS::EC2::VPCGatewayAttachment'
+  # Route Table for the VPC
+  MyRouteTable:
+    Type: 'AWS::EC2::RouteTable'
     Properties:
       VpcId: !Ref MyVPC
-      InternetGatewayId: !Ref MyInternetGateway
+      Tags:
+        - Key: Name
+          Value: MyRouteTable
 
   # Public Subnet One
   PublicSubnetOne:
@@ -80,6 +71,26 @@ Resources:
       Tags:
         - Key: Name
           Value: PublicSubnetTwo
+
+  AttachRouteTableteste:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnetOne
+      RouteTableId: !Ref MyRouteTable
+
+  AttachRouteTableteste2:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnetTwo
+      RouteTableId: !Ref MyRouteTable
+  # Attach Internet Gateway to the VPC
+
+  # Attach Internet Gateway to the VPC
+  AttachGateway:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref MyVPC
+      InternetGatewayId: !Ref MyInternetGateway
 
   # Security Group for EC2 Instances
   InstanceSecurityGroup:
@@ -117,12 +128,14 @@ Resources:
           ToPort: 443
           CidrIp: 0.0.0.0/0
 
+  # IAM Role and Instance Profile for EC2 Instances
   MyInstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
     Properties:
       Roles:
         - Ref: MyInstanceRole
 
+  # IAM Role for EC2 Instances
   MyInstanceRole:
     Type: 'AWS::IAM::Role'
     Properties: 
@@ -261,7 +274,6 @@ Resources:
       ComparisonOperator: LessThanThreshold
       AlarmActions:
         - !Ref ScaleDownPolicy
-
 
   # ALB
   MyALB:
