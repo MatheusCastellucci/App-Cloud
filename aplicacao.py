@@ -1,85 +1,116 @@
 import boto3
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from botocore.exceptions import NoCredentialsError, PartialCredentialsError
+from flask import Flask, request, jsonify
+import logging
 
-# Configurações do DynamoDB
-dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
-table = dynamodb.Table('MyDynamoDBTableName')
+app = Flask(__name__)
 
-# Modelo Pydantic para usuário
-class Usuario(BaseModel):
-    usuario_id: int
-    nome: str
+# Inicializa o DynamoDB
+dynamodb = boto3.resource('dynamodb', region_name='sa-east-1')
+table = dynamodb.Table('MatheusTable')
 
-# Inicializa a aplicação FastAPI
-app = FastAPI()
+# Configura o logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
 
-# Funções auxiliares
-def get_usuario(usuario_id):
+@app.route('/health', methods=['GET'])
+def health():
+    health_status = {'DynamoDB': 'Healthy'}
     try:
-        response = table.get_item(Key={'UserID': str(usuario_id)})
-        return response.get('Item', None)
+        table.table_status
+    except NoCredentialsError:
+        logger.error("Credenciais não disponíveis")
+        health_status['DynamoDB'] = 'Degraded - No credentials'
+    except PartialCredentialsError:
+        logger.error("Credenciais incompletas")
+        health_status['DynamoDB'] = 'Degraded - Incomplete credentials'
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao obter usuário {usuario_id}: {str(e)}")
+        logger.error(f"Ocorreu um erro com o DynamoDB: {e}")
+        health_status['DynamoDB'] = f'Unhealthy - {e}' 
+    overall_status = 'Healthy' if all(status == 'Healthy' for status in health_status.values()) else 'Unhealthy'
+    return jsonify({'message': overall_status, 'details': health_status}), 200 if overall_status == 'Healthy' else 500
 
-def criar_usuario(usuario: Usuario):
+@app.route('/add_user', methods=['POST'])
+def add_user():
     try:
-        if get_usuario(usuario.usuario_id):
-            raise HTTPException(status_code=400, detail="ID de usuário já existe")
-        table.put_item(Item={'UserID': str(usuario.usuario_id), 'Name': usuario.nome})
-        return usuario
+        user_data = request.json
+        if not user_data.get('user_id') or not user_data.get('name'):
+            return jsonify({'error': '"user_id" e "name" são campos obrigatórios'}), 400
+        item = {
+            'user_id': user_data['user_id'],
+            'name': user_data['name'],
+        }
+        if 'user_id' in table.get_item(Key={'user_id': user_data['user_id']}).get('Item', {}):
+            return jsonify({'error': 'Usuário já existe, poste em /update_user para atualizar um usuário.'}), 400
+        response = table.put_item(Item=item)
+        return jsonify({'message': 'Usuário adicionado com sucesso', 'response': response}), 200
+    except NoCredentialsError:
+        logger.error("Credenciais não disponíveis")
+        return jsonify({'error': 'Credenciais não disponíveis'}), 500
+    except PartialCredentialsError:
+        logger.error("Credenciais incompletas")
+        return jsonify({'error': 'Credenciais incompletas'}), 500
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao criar usuário: {str(e)}")
+        logger.error(f"Ocorreu um erro: {e}")
+        return jsonify({'error': str(e)}), 500
 
-def listar_usuarios():
+@app.route('/get_user', methods=['GET'])
+def get_user():
     try:
-        response = table.scan()
-        return response.get('Items', [])
+        user_id = request.args.get('user_id')
+        if not user_id:
+            return jsonify({'error': 'user_id é um campo obrigatório'}), 400
+        response = table.get_item(Key={'user_id': user_id})
+        return jsonify({'message': 'Usuário recuperado com sucesso', 'user_data': response.get('Item', {})})
+    except NoCredentialsError:
+        logger.error("Credenciais não disponíveis")
+        return jsonify({'error': 'Credenciais não disponíveis'}), 500
+    except PartialCredentialsError:
+        logger.error("Credenciais incompletas")
+        return jsonify({'error': 'Credenciais incompletas'}), 500
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao listar usuários: {str(e)}")
+        logger.error(f"Ocorreu um erro: {e}")
+        return jsonify({'error': str(e)}), 500
 
-def atualizar_usuario(usuario_id: int, usuario: Usuario):
+@app.route('/delete_user', methods=['DELETE'])
+def delete_user():
     try:
-        if not get_usuario(usuario_id):
-            raise HTTPException(status_code=404, detail="Usuário não encontrado")
-        table.update_item(
-            Key={'UserID': str(usuario_id)},
-            UpdateExpression='SET Name = :n',
-            ExpressionAttributeValues={':n': usuario.nome}
-        )
-        return usuario
+        user_id = request.args.get('user_id')
+        if not user_id:
+            return jsonify({'error': 'user_id é um campo obrigatório'}), 400
+        response = table.delete_item(Key={'user_id': user_id})
+        return jsonify({'message': 'Usuário excluído com sucesso', 'response': response}), 200
+    except NoCredentialsError:
+        logger.error("Credenciais não disponíveis")
+        return jsonify({'error': 'Credenciais não disponíveis'}), 500
+    except PartialCredentialsError:
+        logger.error("Credenciais incompletas")
+        return jsonify({'error': 'Credenciais incompletas'}), 500
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao atualizar usuário {usuario_id}: {str(e)}")
+        logger.error(f"Ocorreu um erro: {e}")
+        return jsonify({'error': str(e)}), 500
 
-def deletar_usuario(usuario_id: int):
+@app.route('/update_user', methods=['PUT'])
+def update_user():
     try:
-        if not get_usuario(usuario_id):
-            raise HTTPException(status_code=404, detail="Usuário não encontrado")
-        table.delete_item(Key={'UserID': str(usuario_id)})
-        return {"message": f"Usuário {usuario_id} deletado com sucesso!"}
+        user_data = request.json
+        if not user_data.get('user_id'):
+            return jsonify({'error': 'user_id é um campo obrigatório'}), 400
+        item = {
+            'user_id': user_data['user_id'],
+            'name': user_data.get('name'),
+        }
+        response = table.put_item(Item=item)
+        return jsonify({'message': 'Usuário atualizado com sucesso', 'response': response}), 200
+    except NoCredentialsError:
+        logger.error("Credenciais não disponíveis")
+        return jsonify({'error': 'Credenciais não disponíveis'}), 500
+    except PartialCredentialsError:
+        logger.error("Credenciais incompletas")
+        return jsonify({'error': 'Credenciais incompletas'}), 500
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao deletar usuário {usuario_id}: {str(e)}")
+        logger.error(f"Ocorreu um erro: {e}")
+        return jsonify({'error': str(e)}), 500
 
-# Rotas da Aplicação
-@app.post("/usuarios/")
-async def criar_usuario(usuario: Usuario):
-    return criar_usuario(usuario)
-
-@app.get("/usuarios/")
-async def listar_usuarios():
-    return listar_usuarios()
-
-@app.put("/usuarios/{usuario_id}")
-async def atualizar_usuario(usuario_id: int, usuario: Usuario):
-    return atualizar_usuario(usuario_id, usuario)
-
-@app.get("/usuarios/{usuario_id}") 
-async def buscar_usuario(usuario_id: int):
-    usuario = get_usuario(usuario_id)
-    if usuario:
-        return usuario
-    raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
-@app.delete("/usuarios/{usuario_id}")
-async def deletar_usuario(usuario_id: int):    
-    return deletar_usuario(usuario_id)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=80)
