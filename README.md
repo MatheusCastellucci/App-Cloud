@@ -25,7 +25,7 @@ A arquitetura da solução é composta por 5 componentes principais:
 
 <p align="center"><b style="font-size: 24px;"><u>Diagrama da Arquitetura AWS</u></b></p>
 <p align="center">
-  <img src="imgs\cloud_roteiro.drawio.png" alt="Topologia"/>
+  <img src="imgs\application-composer-template.yaml.png" alt="Topologia"/>
   <p align="center"><style="font-size: 14px;">Algumas imagens foram retiradas do site da AWS (Fonte: https://aws.amazon.com/pt/elasticloadbalancing/ )</p>
 </p>
 
