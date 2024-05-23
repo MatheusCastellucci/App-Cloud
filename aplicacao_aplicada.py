@@ -1,7 +1,6 @@
 import subprocess
 import requests
 import logging
-import json
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
