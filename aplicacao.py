@@ -1,6 +1,7 @@
 import logging
 from flask import Flask, request, jsonify
 import boto3
+import logging
 
 # Configuração do logging
 logging.basicConfig(level=logging.INFO)
