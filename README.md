@@ -4,16 +4,16 @@
 
 ## Descrição do Projeto
 
-O projeto consiste na criação de uma arquitetura de nuvem utilizando AWS. A arquitetura inclui uma aplicação web que será executada em uma instância EC2, que estará dentro de um Auto Scaling Group (ASG) e um Application Load Balancer (ALB) para distribuir a carga entre as instâncias EC2. A aplicação web será uma API RESTful com funcionalidades CRUD simples, acessando um banco de dados DynamoDB, um serviço NoSQL da AWS que oferece alta escalabilidade e desempenho.
+O projeto consiste na criação de uma arquitetura de nuvem utilizando AWS. A arquitetura inclui uma aplicação web que será executada em uma instância EC2, que estará dentro de um Auto Scaling Group (ASG) e um Application Load Balancer (ALB) para distribuir a carga entre as instâncias EC2. Além disso, temos uma aplicação simples para comprovar o funcionamento do DynamoDB, que é um banco de dados NoSQL totalmente gerenciado pela AWS.
 
 ## Arquitetura da Solução
-A arquitetura da solução é composta por 5 componentes principais:
+Os componentes principais da arquitetura da solução são:
 
-1. **EC2**: A instância EC2 é uma máquina virtual na nuvem da AWS que será responsável por executar a aplicação web. A instância EC2 estará dentro de um Auto Scaling Group (ASG) para garantir alta disponibilidade e escalabilidade automática.
+1. **EC2**: A instância EC2 é uma máquina virtual na nuvem da AWS que será responsável por executar a aplicação web. Ela estará dentro de um Auto Scaling Group (ASG) para garantir alta disponibilidade e escalabilidade automática.
 
-2. **Auto Scaling Group (ASG)**: O Auto Scaling Group é um grupo de instâncias EC2 que podem ser gerenciadas como uma unidade lógica para fins de dimensionamento automático e aplicação de políticas. O ASG garante que o número especificado de instâncias do EC2 esteja sempre em execução.
+2. **Auto Scaling Group (ASG)**: O Auto Scaling Group é um grupo de instâncias EC2 que podem ser gerenciadas como uma unidade lógica para fins de dimensionamento automático e aplicação de políticas. Ele garante que o número especificado de instâncias do EC2 esteja sempre em execução.
 
-3. **CloudWatch**: O Amazon CloudWatch é um serviço de monitoramento e observabilidade da AWS para recursos em nuvem e aplicativos executados na AWS. O CloudWatch será utilizado para monitorar o status do ASG e das instâncias EC2, além de criar novas instâncias automaticamente quando o uso da CPU ultrapassar um determinado limite.
+3. **CloudWatch**: O Amazon CloudWatch é um serviço de monitoramento e observabilidade da AWS para recursos em nuvem e aplicativos executados na AWS. Ele será utilizado para monitorar o status do ASG e das instâncias EC2, além de criar novas instâncias automaticamente quando o uso da CPU ultrapassar um determinado limite.
 
 
 <p align="center"><b style="font-size: 24px;"><u>Topologia da solução</u></b></p>
@@ -36,16 +36,16 @@ A arquitetura da solução é composta por 5 componentes principais:
 * A Amazon Web Services (AWS) é uma plataforma de computação em nuvem oferecida pela Amazon.com, composta por diversos serviços de computação. Esses serviços são disponibilizados em várias regiões geográficas ao redor do mundo.
 
 ### AWS CLI
-* O AWS Command Line Interface (AWS CLI) é uma ferramenta unificada para gerenciar serviços da AWS. Com uma única ferramenta para download e configuração, você pode controlar vários serviços da AWS a partir da linha de comando e automatizar tarefas por meio de scripts.
+* O AWS Command Line Interface (AWS CLI) é uma ferramenta unificada que permite gerenciar os serviços da Amazon Web Services (AWS) por meio de comandos de linha de comando. Com o AWS CLI, é possível controlar vários serviços da AWS e automatizar tarefas, facilitando a interação com a plataforma de computação em nuvem da AWS.
 
 ### AWS EC2
-* O Amazon Elastic Compute Cloud (Amazon EC2) é um serviço web que oferece capacidade de computação redimensionável na nuvem. Foi projetado para facilitar a computação em nuvem em escala web para desenvolvedores.
+* O Amazon Elastic Compute Cloud (Amazon EC2) é um serviço de computação em nuvem que oferece capacidade de computação redimensionável na nuvem. Ele permite que os usuários executem virtualmente qualquer tipo de aplicativo em servidores virtuais, conhecidos como instâncias EC2, proporcionando escalabilidade e flexibilidade para as cargas de trabalho.
 
 ### AWS ALB
-* O Application Load Balancer (ALB) é um balanceador de carga gerenciado pela AWS, projetado para aplicativos HTTP e HTTPS. Operando na camada 7, o ALB roteia o tráfego de entrada para alvos como instâncias do Amazon EC2, contêineres do Amazon ECS e funções do AWS Lambda, com base nas regras definidas pelo usuário. Neste projeto, o ALB também foi configurado com "Health Checks" para verificar a integridade das instâncias EC2 e removê-las do balanceamento de carga se estiverem inativas.
+* O Application Load Balancer (ALB) da AWS é um balanceador de carga gerenciado projetado para aplicativos HTTP e HTTPS. Ele opera na camada 7 do modelo OSI, roteando o tráfego de entrada para diferentes destinos, como instâncias do Amazon EC2, com base em regras definidas pelo usuário. O ALB também oferece recursos avançados, como "Health Checks" para verificar a integridade das instâncias e escalabilidade automática.
 
 ### AWS ASG
-* O Auto Scaling Group (ASG) é um grupo de instâncias do Amazon EC2 que podem ser gerenciadas como uma unidade lógica para fins de dimensionamento automático e aplicação de políticas. Um ASG garante que o número especificado de instâncias do EC2 esteja sempre em execução.
+* O Auto Scaling Group (ASG) da AWS é um grupo de instâncias do Amazon EC2 que podem ser gerenciadas como uma única unidade para fins de dimensionamento automático e aplicação de políticas. O ASG garante que o número especificado de instâncias EC2 esteja sempre em execução, ajustando automaticamente a capacidade de acordo com a demanda, o que ajuda a garantir a disponibilidade e a otimizar os custos.
 
 ### AWS CloudWatch
 * O Amazon CloudWatch é um serviço de monitoramento e observabilidade da AWS para recursos em nuvem e aplicativos executados na AWS. Ele permite coletar e rastrear métricas, monitorar arquivos de log e definir alarmes. Neste projeto, o CloudWatch foi utilizado para monitorar o status do ASG e das instâncias EC2. Além disso, o CloudWatch também foi configurado para criar novas instâncias automaticamente quando o uso da CPU ultrapassa 70%.
@@ -110,7 +110,7 @@ chmod +x dns_finder.sh
 ```
 Esse comando retorna o DNS do ALB. Para usar esse comando é necessário que a stack já tenha sido criada.
 
-### Teste da Aplicação
+## Teste da Aplicação
 
 Para testar a aplicação, você pode usar o comando curl para enviar requisições HTTP para a API RESTful. Abaixo estão alguns exemplos de comandos curl para testar as funcionalidades CRUD da aplicação:
 
@@ -148,11 +148,11 @@ curl -X DELETE <ALB-DNS>/delete_user?user_id=1
 Substitua `<ALB-DNS>` pelo DNS do Application Load Balancer (ALB) gerado após a criação da stack.
 
 ## Escolha da região
-A região escolhida para a execução do projeto foi SA-east-1. A seleção foi baseada na latência e no custo dos serviços. A região SA-east-1 é a única pertencente ao Brasil, proporcionando menor latência para os usuários brasileiros, além de possuir preços competitivos em relação a outras regiões.
+A região selecionada para a execução do projeto foi SA-east-1, a qual foi escolhida com base na latência e no custo dos serviços. SA-east-1 é a única região localizada no Brasil, o que garante menor latência para os usuários brasileiros. Além disso, essa região oferece preços competitivos em comparação com outras regiões.
 
 ## Projeção de custos do projeto
-Para estimar os custos associados à arquitetura proposta, utilizamos o AWS Cost Calculator. Esta ferramenta permite modelar e comparar os custos de diferentes configurações de serviços AWS, ajudando a tomar decisões informadas sobre escalabilidade e custo-benefício.
-Os principais custos são associados ao DynamoDB e ao Elastic Load Balancer, que são os serviços mais caros da aplicação. Abaixo estão os custos estimados para a aplicação proposta:
+Para estimar os custos relacionaos à arquitetura proposta pelo projeto, utilizamos o AWS Cost Calculator. Esta ferramenta permite modelar e comparar os custos de diferentes configurações de serviços AWS, com base em fatores como região, tipo de instância, armazenamento, transferência de dados e outros.
+Os principais custos da arquitetura do projeto são associados ao DynamoDB e ao Elastic Load Balancer. Abaixo estão os custos estimados para a aplicação proposta:
 
 1. **DynamoDB**:DynamoDB: $26,39 por/mês (1 table with 1GB of storage)
 2. **Elastic Load Balancer**: Elastic Load Balancer: $16,44 per/month (1 Application Load Balancer)
@@ -160,7 +160,7 @@ Os principais custos são associados ao DynamoDB e ao Elastic Load Balancer, que
 Para mais informações sobre os custos dos serviços AWS, consulte o arquivo : [Estimativa de Custos AWS](https://github.com/MatheusCastellucci/App-Cloud/blob/main/imgs/My%20Estimate%20-%20Calculadora%20de%20Pre%C3%A7os%20da%20AWS.pdf)
 
 ## Calculo real dos custos
-Como não temos permissão para acessar a aba de `Tags de Alocação de custos`, podemos utilizar a aba de `Billing & Cost Management` para verificar um sumário dos custos do projeto.
+Apesar de não termos acesso completo à todas as funcionalidades da AWS, podemos utilizar a aba de `Billing & Cost Management` para verificar um sumário dos custos do projeto.
 
 <p align="center"><b style="font-size: 24px;"><u>Custos do Projeto</u></b></p>
 <p align="center">
