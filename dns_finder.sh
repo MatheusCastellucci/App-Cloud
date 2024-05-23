@@ -3,4 +3,4 @@
 # Example script to get the DNS
 # Replace this with the actual command to retrieve your DNS
 
-aws cloudformation describe-stacks --stack-name yobama --query "Stacks[0].Outputs[?OutputKey=='ALBDNSName'].OutputValue" --output text
+aws cloudformation describe-stacks --stack-name MatStack --query "Stacks[0].Outputs[?OutputKey=='ALBDNSName'].OutputValue" --output text
