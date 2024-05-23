@@ -1,149 +1,78 @@
-import boto3
-from botocore.exceptions import NoCredentialsError, PartialCredentialsError
-from flask import Flask, request, jsonify
 import logging
+from flask import Flask, request, jsonify
+import boto3
 
-app = Flask(__name__)
-
-# Initialize DynamoDB's boto3 client
-dynamodb = boto3.resource('dynamodb', region_name='sa-east-1')
-table = dynamodb.Table('MatheusTable')
-
-# Set up logging
+# Configuração do logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
+app = Flask(__name__)
+
+# Inicialização do cliente boto3 para DynamoDB
+def initialize_dynamodb():
+    dynamodb = boto3.resource('dynamodb', region_name='sa-east-1')
+    return dynamodb.Table('MatheusTable')
+
+table = initialize_dynamodb()
+
+# Constantes para respostas
+HEALTHY_STATUS = 'Healthy'
+UNHEALTHY_STATUS = 'Unhealthy'
 
 @app.route('/health', methods=['GET'])
 def health():
-    healthy = {'DynamoDB': 'Healthy'}
+    health = {'DynamoDB': HEALTHY_STATUS}
     try:
-        # Check if DynamoDB table is available
         table.table_status
-    except NoCredentialsError:
-        logger.error("Credentials not available")
-        healthy['DynamoDB'] = 'Degraded - No credentials'
-    except PartialCredentialsError:
-        logger.error("Incomplete credentials")
-        healthy['DynamoDB'] = 'Degraded - Incomplete credentials'
     except Exception as e:
         logger.error(f"An error occurred with DynamoDB: {e}")
-        healthy['DynamoDB'] = f'Unhealthy - {e}'
+        health['DynamoDB'] = f'{UNHEALTHY_STATUS} - {e}'
     
-    status = 'Healthy' if all(status == 'Healthy' for status in healthy.values()) else 'Unhealthy'
-    
-    return jsonify({'message': status, 'details': healthy}), 200 if status == 'Healthy' else 500
+    if all(status == HEALTHY_STATUS for status in health.values()):
+        status = HEALTHY_STATUS
+        return jsonify({'message': status, 'details': health}), 200
+    else:
+        status = UNHEALTHY_STATUS
+        return jsonify({'message': status, 'details': health}), 500
 
-@app.route('/add_user', methods=['POST'])
-def add_user():
+@app.route('/create_user', methods=['POST'])
+def create_user():
     try:
-        # Get data from the request
         user_data = request.json
-        
-        # Validate input
-        if not user_data.get('user_id') or not user_data.get('name'):
-            return jsonify({'error': 'user_id and name are required fields'}), 400
-        
-        # Ensure user_id is included in the item
-        item = {
-            'user_id': user_data['user_id'],
-            'name': user_data['name'],
-        }
-        
-        if 'user_id' in table.get_item(Key={'user_id': user_data['user_id']}).get('Item', {}):
-            return jsonify({'error': 'User already exists, post to /update_user to update an user.'}), 400
-        # Save data to DynamoDB
-        response = table.put_item(Item=item)
-        
-        return jsonify({'message': 'User added successfully', 'response': response}), 200
-    except NoCredentialsError:
-        logger.error("Credentials not available")
-        return jsonify({'error': 'Credentials not available'}), 500
-    except PartialCredentialsError:
-        logger.error("Incomplete credentials")
-        return jsonify({'error': 'Incomplete credentials'}), 500
+        response = table.put_item(Item={'UserID': user_data['user_id'], 'Name':  user_data['name']})
+        return jsonify({'message': 'User criado com sucesso', 'response': response}), 200
     except Exception as e:
-        logger.error(f"An error occurred: {e}")
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Ocorreu um erro: {e}")
+        return jsonify({'erro': str(e)}), 500
 
 @app.route('/get_user', methods=['GET'])
 def get_user():
     try:
-        # Get user_id from the request
         user_id = request.args.get('user_id')
-        
-        # Validate input
-        if not user_id:
-            return jsonify({'error': 'user_id is a required field'}), 400
-        
-        # Get user data from DynamoDB
-        response = table.get_item(Key={'user_id': user_id})
-        
-        return jsonify({'message': 'User retrieved successfully', 'user_data': response.get('Item', {})})
-    except NoCredentialsError:
-        logger.error("Credentials not available")
-        return jsonify({'error': 'Credentials not available'}), 500
-    except PartialCredentialsError:
-        logger.error("Incomplete credentials")
-        return jsonify({'error': 'Incomplete credentials'}), 500
+        response = table.get_item(Key={'UserID': user_id})
+        return jsonify({'message': 'User encontrado com sucesso', 'user_data': response.get('Item', {})}), 200
     except Exception as e:
-        logger.error(f"An error occurred: {e}")
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Ocorreu um erro: {e}")
+        return jsonify({'erro': str(e)}), 500
 
 @app.route('/update_user', methods=['PUT'])
 def update_user():
     try:
-        # Get data from the request
         user_data = request.json
-        
-        # Validate input
-        if not user_data.get('user_id'):
-            return jsonify({'error': 'user_id is a required field'}), 400
-        
-        # Ensure user_id is included in the item
-        item = {
-            'user_id': user_data['user_id'],
-            'name': user_data.get('name'),
-            # Include other attributes as necessary
-        }
-        
-        # Save data to DynamoDB
-        response = table.put_item(Item=item)
-        
-        return jsonify({'message': 'User updated successfully', 'response': response}), 200
-    except NoCredentialsError:
-        logger.error("Credentials not available")
-        return jsonify({'error': 'Credentials not available'}), 500
-    except PartialCredentialsError:
-        logger.error("Incomplete credentials")
-        return jsonify({'error': 'Incomplete credentials'}), 500
+        response = table.put_item(Item={'UserID': user_data['user_id'], 'Name':  user_data['name']})
+        return jsonify({'message': 'User atualizado com sucesso', 'response': response}), 200
     except Exception as e:
-        logger.error(f"An error occurred: {e}")
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Ocorreu um erro: {e}")
+        return jsonify({'erro': str(e)}), 500
 
 @app.route('/delete_user', methods=['DELETE'])
 def delete_user():
     try:
-        # Get user_id from the request
-        user_id = request.args.get('user_id')
-        
-        # Validate input
-        if not user_id:
-            return jsonify({'error': 'user_id is a required field'}), 400
-        
-        # Delete user data from DynamoDB
-        response = table.delete_item(Key={'user_id': user_id})
-        
-        return jsonify({'message': 'User deleted successfully', 'response': response}), 200
-    except NoCredentialsError:
-        logger.error("Credentials not available")
-        return jsonify({'error': 'Credentials not available'}), 500
-    except PartialCredentialsError:
-        logger.error("Incomplete credentials")
-        return jsonify({'error': 'Incomplete credentials'}), 500
+        response = table.delete_item(Key={'UserID': request.args.get('user_id')})
+        return jsonify({'message': 'User deletado com sucesso', 'response': response}), 200
     except Exception as e:
-        logger.error(f"An error occurred: {e}")
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Ocorreu um erro: {e}")
+        return jsonify({'erro': str(e)}), 500
    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
