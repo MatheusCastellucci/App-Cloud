@@ -1,20 +1,16 @@
-import logging
-from flask import Flask, request, jsonify
 import boto3
+from flask import Flask, request, jsonify
 import logging
-
-# Configuração do logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger()
 
 app = Flask(__name__)
 
 # Inicialização do cliente boto3 para DynamoDB
-def initialize_dynamodb():
-    dynamodb = boto3.resource('dynamodb', region_name='sa-east-1')
-    return dynamodb.Table('MatheusTable')
+dynamodb = boto3.resource('dynamodb', region_name='sa-east-1')
+table = dynamodb.Table('MatheusTable')
 
-table = initialize_dynamodb()
+# Configuração do logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
 
 # Constantes para respostas
 HEALTHY_STATUS = 'Healthy'
