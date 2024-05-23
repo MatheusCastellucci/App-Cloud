@@ -84,7 +84,7 @@ Com esses 2 comandos é possível deixar o script executável, e executar o scri
 
 Após alguns minutos a stack estará criada e será possível acessar a aplicação através do link que será gerado no output da stack.
 
-### Atualização da Aplicação
+### Atualização da Stack
 
 ```bash
 chmod +x atualizar.sh
@@ -102,7 +102,7 @@ chmod +x end.sh
 ```
 Esse comando exclui a stack criada. Para usar esse comando é necessário que a stack já tenha sido criada.
 
-### Obtenção do DNS do ALB
+### Obtenção do DNS
 
 ```bash
 chmod +x dns_finder.sh
