@@ -36,7 +36,7 @@ def health():
 def create_user():
     try:
         user_data = request.json
-        response = table.put_item(Item={'UserID': user_data['user_id'], 'Name':  user_data['name']})
+        response = table.put_item(Item={'user_id': user_data['user_id'], 'name':  user_data['name']})
         return jsonify({'message': 'User criado com sucesso', 'response': response}), 200
     except Exception as e:
         logger.error(f"Ocorreu um erro: {e}")
@@ -46,7 +46,7 @@ def create_user():
 def get_user():
     try:
         user_id = request.args.get('user_id')
-        response = table.get_item(Key={'UserID': user_id})
+        response = table.get_item(Key={'user_id': user_id})
         return jsonify({'message': 'User encontrado com sucesso', 'user_data': response.get('Item', {})}), 200
     except Exception as e:
         logger.error(f"Ocorreu um erro: {e}")
@@ -56,7 +56,7 @@ def get_user():
 def update_user():
     try:
         user_data = request.json
-        response = table.put_item(Item={'UserID': user_data['user_id'], 'Name':  user_data['name']})
+        response = table.put_item(Item={'user_id': user_data['user_id'], 'name':  user_data['name']})
         return jsonify({'message': 'User atualizado com sucesso', 'response': response}), 200
     except Exception as e:
         logger.error(f"Ocorreu um erro: {e}")
@@ -65,7 +65,7 @@ def update_user():
 @app.route('/delete_user', methods=['DELETE'])
 def delete_user():
     try:
-        response = table.delete_item(Key={'UserID': request.args.get('user_id')})
+        response = table.delete_item(Key={'user_id': request.args.get('user_id')})
         return jsonify({'message': 'User deletado com sucesso', 'response': response}), 200
     except Exception as e:
         logger.error(f"Ocorreu um erro: {e}")
