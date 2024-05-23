@@ -77,8 +77,8 @@ Com tudo configurado, acesse o serviço de CloudFormation da AWS e crie um novo 
 ### Criação do Stack
 
 ```bash
-chmod +x run.sh
-./run.sh
+chmod +x criar_stack.sh
+./criar_stack.sh
 ```
 Com esses 2 comandos é possível deixar o script executável, e executar o script que cria a stack.
 
@@ -87,8 +87,8 @@ Após alguns minutos a stack estará criada e será possível acessar a aplicaç
 ### Atualização da Stack
 
 ```bash
-chmod +x atualizar.sh
-./atualizar.sh
+chmod +x atualizar_stack.sh
+./atualizar_stack.sh
 ```
 Esse comando atualiza a aplicação, caso seja necessário. Para usar esse comando é necessário que a stack já tenha sido criada. 
 
@@ -97,8 +97,8 @@ O comando também só funcionará se houver mudanças no .yaml, caso contrário,
 ### Exclusão da Stack
 
 ```bash
-chmod +x end.sh
-./end.sh
+chmod +x destruir_stack.sh
+./destruir_stack.sh
 ```
 Esse comando exclui a stack criada. Para usar esse comando é necessário que a stack já tenha sido criada.
 
@@ -148,7 +148,7 @@ curl -X DELETE <ALB-DNS>/delete_user?user_id=1
 Substitua `<ALB-DNS>` pelo DNS do Application Load Balancer (ALB) gerado após a criação da stack.
 
 ## Escolha da região
-A região escolhida para a execução do projeto foi SA-east-1. A seleção foi baseada na latência e no custo dos serviços. A região SA-east-1 é a mais próxima do Brasil, proporcionando menor latência para os usuários brasileiros, além de possuir preços competitivos em relação a outras regiões.
+A região escolhida para a execução do projeto foi SA-east-1. A seleção foi baseada na latência e no custo dos serviços. A região SA-east-1 é a única pertencente ao Brasil, proporcionando menor latência para os usuários brasileiros, além de possuir preços competitivos em relação a outras regiões.
 
 ## Projeção de custos do projeto
 Para estimar os custos associados à arquitetura proposta, utilizamos o AWS Cost Calculator. Esta ferramenta permite modelar e comparar os custos de diferentes configurações de serviços AWS, ajudando a tomar decisões informadas sobre escalabilidade e custo-benefício.
