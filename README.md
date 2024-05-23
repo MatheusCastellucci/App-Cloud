@@ -124,7 +124,7 @@ Esse comando executa um script que faz os testes de CRUD na aplicação. Para us
 2. **Criar um novo item**:
 
 ```bash
-curl -X POST -H "Content-Type: application/json" -d '{"id": "1", "name": "Matheus"}' <ALB-DNS>/add_user
+curl -X POST <ALB-DNS>/create_user -H "Content-Type: application/json" -d '{"user_id": "1", "name": "Matheus"}'
 ```
 
 3. **Obter um item existente**:
@@ -136,7 +136,7 @@ curl -X GET "<ALB-DNS>/get_user?user_id=1"
 4. **Atualizar um item existente**:
 
 ```bash
-curl -X PUT <ALB-DNS>/update_user -H "Content-Type: application/json" -d '{"id": "1", "name": "Matheus Castellucci"}' 
+curl -X PUT <ALB-DNS>/update_user -H "Content-Type: application/json" -d '{"user_id": "1", "name": "Matheus Castellucci"}' 
 ```
 
 5. **Excluir um item existente**:
