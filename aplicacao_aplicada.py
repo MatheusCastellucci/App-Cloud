@@ -6,22 +6,6 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
-def dns_finder():
-    try:
-        # Run the bash script to get the DNS
-        result = subprocess.run(['bash', 'dns_finder.sh'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        
-        if result.returncode != 0:
-            logger.error(f"Error getting DNS: {result.stderr}")
-            return None
-        
-        dns = result.stdout.strip()
-        logger.info(f"Retrieved DNS: {dns}")
-        return dns
-    except Exception as e:
-        logger.error(f"An error occurred while getting DNS: {e}")
-        return None
-
 def check_health(dns):
     try:
         url = f"http://{dns}/health"
@@ -36,6 +20,19 @@ def check_health(dns):
             return None
     except Exception as e:
         logger.error(f"An error occurred while checking health: {e}")
+        return None
+    
+def dns_finder():
+    try:
+        result = subprocess.run(['bash', 'dns_finder.sh'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode != 0:
+            logger.error(f"Error getting DNS: {result.stderr}")
+            return None
+        dns = result.stdout.strip()
+        logger.info(f"Retrieved DNS: {dns}")
+        return dns
+    except Exception as e:
+        logger.error(f"An error occurred while getting DNS: {e}")
         return None
 
 def create_user(dns, user_data):
@@ -105,10 +102,10 @@ def main():
         health_status = check_health(dns)
         if health_status and health_status['message'] == 'Healthy':
             users = [
-                {'user_id': 'user1', 'name': 'Test User 1'},
-                {'user_id': 'user2', 'name': 'Test User 2'},
-                {'user_id': 'user3', 'name': 'Test User 3'},
-                {'user_id': 'mat', 'name': 'matt'}
+                {'user_id': '1', 'name': 'Test User 1'},
+                {'user_id': '2', 'name': 'Test User 2'},
+                {'user_id': '3', 'name': 'Test User 3'},
+                {'user_id': '4', 'name': 'mat'}
             ]
 
             for user in users:
