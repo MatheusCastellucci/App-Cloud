@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Infraestrutura da AWS para projeto de Computação em Nuvem
+Description: Infraestrutura da AWS para projeto de Cloud Computing - Matheus Castellucci
 
 Resources:
 
@@ -39,17 +39,8 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref MyInternetGateway
 
-  # Route Table for the VPC
-  MyRouteTable:
-    Type: 'AWS::EC2::RouteTable'
-    Properties:
-      VpcId: !Ref MyVPC
-      Tags:
-        - Key: Name
-          Value: MyRouteTable
-
   # Public Subnet One
-  PublicSubnetOne:
+  PublicSubnet1:
     Type: 'AWS::EC2::Subnet'
     Properties:
       VpcId: !Ref MyVPC
@@ -58,10 +49,10 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: PublicSubnetOne
+          Value: PublicSubnet1
 
   # Public Subnet Two
-  PublicSubnetTwo:
+  PublicSubnet2:
     Type: 'AWS::EC2::Subnet'
     Properties:
       VpcId: !Ref MyVPC
@@ -70,23 +61,22 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: PublicSubnetTwo
+          Value: PublicSubnet2
 
-  AttachRouteTableteste:
+  SubnetRouteTableAssociation:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      SubnetId: !Ref PublicSubnetOne
+      SubnetId: !Ref PublicSubnet1
       RouteTableId: !Ref MyRouteTable
 
-  AttachRouteTableteste2:
+  SubnetRouteTableAssociation2:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      SubnetId: !Ref PublicSubnetTwo
+      SubnetId: !Ref PublicSubnet2
       RouteTableId: !Ref MyRouteTable
+  
   # Attach Internet Gateway to the VPC
-
-  # Attach Internet Gateway to the VPC
-  AttachGateway:
+  GatewayAttachment:
     Type: 'AWS::EC2::VPCGatewayAttachment'
     Properties:
       VpcId: !Ref MyVPC
@@ -168,9 +158,7 @@ Resources:
       InstanceType: t2.micro
       SecurityGroups:
         - !Ref InstanceSecurityGroup
-      KeyName: MyKeyPair  # Replace with your key pair name
       IamInstanceProfile: !Ref MyInstanceProfile
-
       UserData:
         Fn::Base64: |
           #!/bin/bash
@@ -214,15 +202,14 @@ Resources:
       TargetGroupARNs:
         - !Ref MyTargetGroup
       VPCZoneIdentifier:
-        - !Ref PublicSubnetOne
-        - !Ref PublicSubnetTwo
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
       Tags:
         - Key: Name
-          Value: MyAutoScalingGroup
+          Value: AutoScalingGroupMatheus
           PropagateAtLaunch: true
 
-
-    # Scaling Policies based on NetworkIn
+  # Scaling Policies based on NetworkIn
   ScaleUpPolicy:
     Type: 'AWS::AutoScaling::ScalingPolicy'
     Properties:
@@ -241,7 +228,7 @@ Resources:
       AdjustmentType: ChangeInCapacity
       Cooldown: 60
 
-  NetworkInAlarmHigh:
+  NetworkAlarmHigh:
     Type: 'AWS::CloudWatch::Alarm'
     Properties:
       AlarmDescription: 'Alarm if NetworkIn exceeds 50000 packets per second'
@@ -258,7 +245,7 @@ Resources:
       AlarmActions:
         - !Ref ScaleUpPolicy
 
-  NetworkInAlarmLow:
+  NetworkAlarmLow:
     Type: 'AWS::CloudWatch::Alarm'
     Properties:
       AlarmDescription: 'Alarm if NetworkIn falls below 20000 packets per second'
@@ -281,8 +268,8 @@ Resources:
     Properties:
       Scheme: internet-facing
       Subnets:
-        - !Ref PublicSubnetOne
-        - !Ref PublicSubnetTwo
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
       SecurityGroups:
         - !Ref ALBSecurityGroup
 
@@ -362,17 +349,16 @@ Resources:
         - Ref: 'EC2DynamoDBRole'
 
 
-
 Outputs:
   VPCId:
     Description: "VPC ID"
     Value: !Ref MyVPC
-  PublicSubnetOneId:
+  PublicSubnet1Id:
     Description: "ID of the first public subnet"
-    Value: !Ref PublicSubnetOne
-  PublicSubnetTwoId:
+    Value: !Ref PublicSubnet1
+  PublicSubnet2Id:
     Description: "ID of the second public subnet"
-    Value: !Ref PublicSubnetTwo
+    Value: !Ref PublicSubnet2
   AutoScalingGroupName:
     Description: "Name of the Auto Scaling Group"
     Value: !Ref AutoScalingGroup

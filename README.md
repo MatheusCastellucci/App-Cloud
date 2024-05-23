@@ -26,7 +26,7 @@ A arquitetura da solução é composta por 5 componentes principais:
 <p align="center"><b style="font-size: 24px;"><u>Diagrama da Arquitetura AWS</u></b></p>
 <p align="center">
   <img src="imgs\application-composer-template.yaml.png" alt="Topologia"/>
-  <p align="center"><style="font-size: 14px;">Algumas imagens foram retiradas do site da AWS (Fonte: https://aws.amazon.com/pt/elasticloadbalancing/ )</p>
+  <p align="center"><style="font-size: 14px;">Diagrama feito com uma das ferramentas disponibilizadas pela AWS(https://sa-east-1.console.aws.amazon.com/composer/canvas?mode=new&region=sa-east-1)</p>
 </p>
 
 
@@ -70,40 +70,105 @@ Após a instalação do AWS CLI, configure-o com as credenciais de acesso da sua
 aws configure
 ```
 
-Para executar o projeto, também é necessário criar um par de chaves SSH. Acesse o console da AWS, vá para o serviço EC2, clique em "Key Pairs" no menu lateral esquerdo e crie um novo par de chaves. O arquivo .pem gerado deve ser salvo na pasta raiz do projeto. O nome do par de chaves no arquivo .yaml é "MyKeyPair". Caso queira usar outro nome, altere-o no arquivo .yaml.
-
-![Alt text](imgs\key_pair.jpg)
-
 ## Execução do Projeto
 
-Com tudo configurado, acesse o serviço de CloudFormation da AWS e crie um novo stack. Selecione o arquivo .yaml presente na pasta raiz do projeto e siga as instruções para criar o stack.
+Com tudo configurado, acesse o serviço de CloudFormation da AWS e crie um novo stack. Selecione o arquivo .yaml presente na pasta raiz do projeto e siga as instruções para utilizar o template de criação da arquitetura.
+
+### Criação do Stack
 
 ```bash
-aws cloudformation create-stack --stack-name nome_da_stack --template-body file://projeto_aws.yaml --capabilities CAPABILITY_IAM
+chmod +x run.sh
+./run.sh
 ```
+Com esses 2 comandos é possível deixar o script executável, e executar o script que cria a stack.
+
+Após alguns minutos a stack estará criada e será possível acessar a aplicação através do link que será gerado no output da stack.
+
+### Atualização da Aplicação
 
 ```bash
-aws cloudformation delete-stack --stack-name nome_da_stack
+chmod +x atualizar.sh
+./atualizar.sh
+```
+Esse comando atualiza a aplicação, caso seja necessário. Para usar esse comando é necessário que a stack já tenha sido criada. 
+
+O comando também só funcionará se houver mudanças no .yaml, caso contrário, não haverá atualização.
+
+### Exclusão da Stack
+
+```bash
+chmod +x end.sh
+./end.sh
+```
+Esse comando exclui a stack criada. Para usar esse comando é necessário que a stack já tenha sido criada.
+
+### Obtenção do DNS do ALB
+
+```bash
+chmod +x dns_finder.sh
+./dns_finder.sh
+```
+Esse comando retorna o DNS do ALB. Para usar esse comando é necessário que a stack já tenha sido criada.
+
+### Teste da Aplicação
+
+Para testar a aplicação, você pode usar o comando curl para enviar requisições HTTP para a API RESTful. Abaixo estão alguns exemplos de comandos curl para testar as funcionalidades CRUD da aplicação:
+
+1. **Já existe um script que faz todos os testes de forma automatica**
+
+```bash
+python3 aplicacao_aplicada.py
+```
+Esse comando executa um script que faz os testes de CRUD na aplicação. Para usar esse comando é necessário que a stack já tenha sido criada.
+
+2. **Criar um novo item**:
+
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{"id": "1", "name": "Matheus"}' <ALB-DNS>/add_user
 ```
 
+3. **Obter um item existente**:
 
+```bash
+curl -X GET "<ALB-DNS>/get_user?user_id=1"
+```
 
+4. **Atualizar um item existente**:
 
+```bash
+curl -X PUT <ALB-DNS>/update_user -H "Content-Type: application/json" -d '{"id": "1", "name": "Matheus Castellucci"}' 
+```
 
+5. **Excluir um item existente**:
 
+```bash
+curl -X DELETE <ALB-DNS>/delete_user?user_id=1
+```
 
+Substitua `<ALB-DNS>` pelo DNS do Application Load Balancer (ALB) gerado após a criação da stack.
 
 ## Escolha da região
 A região escolhida para a execução do projeto foi SA-east-1. A seleção foi baseada na latência e no custo dos serviços. A região SA-east-1 é a mais próxima do Brasil, proporcionando menor latência para os usuários brasileiros, além de possuir preços competitivos em relação a outras regiões.
 
-## Calculo de custos
+## Projeção de custos do projeto
 Para estimar os custos associados à arquitetura proposta, utilizamos o AWS Cost Calculator. Esta ferramenta permite modelar e comparar os custos de diferentes configurações de serviços AWS, ajudando a tomar decisões informadas sobre escalabilidade e custo-benefício.
 Os principais custos são associados ao DynamoDB e ao Elastic Load Balancer, que são os serviços mais caros da aplicação. Abaixo estão os custos estimados para a aplicação proposta:
 
-1. **DynamoDB**:
-2. **Elastic Load Balancer**:
+1. **DynamoDB**:DynamoDB: $26,39 por/mês (1 table with 1GB of storage)
+2. **Elastic Load Balancer**: Elastic Load Balancer: $16,44 per/month (1 Application Load Balancer)
 
-**Obs**: Para reduzir custos, consideramos possíveis melhorias como a utilização de instâncias reservadas ou instâncias spot, que são mais econômicas do que as instâncias sob demanda, além da substituição do DynamoDB por um banco de dados RDS, que é mais barato.
+Para mais informações sobre os custos dos serviços AWS, consulte o arquivo : [Estimativa de Custos AWS](https://github.com/MatheusCastellucci/App-Cloud/blob/main/imgs/My%20Estimate%20-%20Calculadora%20de%20Pre%C3%A7os%20da%20AWS.pdf)
+
+## Calculo real dos custos
+Como não temos permissão para acessar a aba de `Tags de Alocação de custos`, podemos utilizar a aba de `Billing & Cost Management` para verificar um sumário dos custos do projeto.
+
+<p align="center"><b style="font-size: 24px;"><u>Custos do Projeto</u></b></p>
+<p align="center">
+  <img src="imgs\custos.jpg" alt="Topologia"/>
+  <p align="center"><style="font-size: 14px;">Foto tirada em  23/05/2024</p>
+</p>  
+
+Os valores apresentados na imagem acima são referentes ao período de 1 mês de execução do projeto. Claro que isto não apresenta o custo real do projeto, pois o mesmo foi executado por apenas alguns dias e o valor apresentado é referente a um mês de execução. Vale mencionar também que o valor apresentado não leva em consideração o porte que a aplicação precisaria ter para atender a demanda de usuários.
 
 ## Referências
 As principais referências utilizadas foram:
