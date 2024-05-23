@@ -39,9 +39,9 @@ def check_health(dns):
         logger.error(f"An error occurred while checking health: {e}")
         return None
 
-def add_user(dns, user_data):
+def create_user(dns, user_data):
     try:
-        url = f"http://{dns}/add_user"
+        url = f"http://{dns}/create_user"
         response = requests.post(url, json=user_data)
         
         if response.status_code == 200:
@@ -113,7 +113,7 @@ def main():
             ]
 
             for user in users:
-                if add_user(dns, user):
+                if create_user(dns, user):
                     retrieved_user = get_user(dns, user['user_id'])
                     if retrieved_user:
                         updated_user_data = {'user_id': user['user_id'], 'name': f"Updated {user['name']}"}
